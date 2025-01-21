@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>High Precision Pi Calculation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #00ff00;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 20px 0;
+    }
+    #piValue {
+      font-size: 1.5rem;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #222;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0, 255, 0, 0.5);
+    }
+    #calculation {
+      font-size: 1rem;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #222;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0, 255, 0, 0.5);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    #loading {
+      color: #ff5500;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      100% { opacity: 0.7; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>High Precision Pi Calculation (Chudnovsky Algorithm)</h1>
+  <div id="loading">Calculating Pi...</div>
+  <div id="calculation"></div>
+  <div id="piValue"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.2.1/decimal.min.js"></script>
+
+  <script>
+    // Function to calculate Pi using the Chudnovsky algorithm
+    function calculatePi(terms) {
+      let sum = new Decimal(0);
+      let C = new Decimal(426880).div(10005);  // Constant in the formula
+      let K = new Decimal(6);  // Starts at 6
+      let M = new Decimal(1);  // Starts at 1
+      let L = new Decimal(13591409);  // Starts at 13591409
+      let X = new Decimal(1);  // Starts at 1
+      let K3 = new Decimal(3);  // K * 3 starts at 3
+      let K6 = new Decimal(1);  // K * 6 starts at 1
+      let calculationSteps = '';
+      let step = 0;
+
+      // Calculate each term and accumulate the sum
+      for (let k = 0; k < terms; k++) {
+        // Chudnovsky series term computation
+        let term = M.mul(L).mul(X).div(K3.pow(3).mul(K6));
+        sum = sum.add(term);  // Add the term to the sum
+
+        // Add the step to the calculation log for visualization
+        calculationSteps += `Step ${step + 1}:\nM = ${M.toString()}, L = ${L.toString()}, X = ${X.toString()}, K = ${K.toString()}, Term = ${term.toString()}\n\n`;
+        
+        // Update variables for next iteration
+        M = M.mul(K3).mul(K3).div(K6);
+        L = L.add(545140134);
+        X = X.mul(-640320);
+        K = K.add(12);
+        K3 = K3.add(6);
+        K6 = K6.add(6);
+
+        step++;
+      }
+
+      // Pi approximation is 1 / sum * C
+      let piApproximation = sum.mul(C);
+      return { piApproximation: piApproximation.toString(), calculationSteps };
+    }
+
+    // Function to display the calculation steps and animated Pi calculation
+    function displayCalculation() {
+      const terms = 5;  // Number of terms to calculate Pi
+      const { piApproximation, calculationSteps } = calculatePi(terms);
+
+      document.getElementById('loading').style.display = 'none';  // Hide loading message
+      document.getElementById('calculation').innerText = calculationSteps;  // Show the calculation steps
+      document.getElementById('piValue').innerText = `Pi Approximation: ${piApproximation}`;  // Show the final approximation of Pi
+    }
+
+    // Start the calculation and display the result
+    displayCalculation();
+  </script>
+
+</body>
+</html>
